@@ -56,4 +56,38 @@ class StoriesDatabaseHelper (context: Context) : SQLiteOpenHelper(context, DATAB
         return storiesList
 
     }
+    fun updateStory(story: Story){
+        val db = writableDatabase
+        val values = ContentValues().apply{
+            put(COLUMN_TITLE,story.title)
+            put(COLUMN_CONTENT,story.content)
+        }
+        val whereClause = "$COLUMN_ID = ?"
+        val whereArgs = arrayOf(story.id.toString())
+        db.update(TABLE_NAME, values,whereClause,whereArgs)
+        db.close()
+    }
+
+    fun getStoryByID(storyId: Int): Story{
+        val db = readableDatabase
+        val query = "SELECT * FROM $TABLE_NAME WHERE $COLUMN_ID = $storyId"
+        val cursor = db.rawQuery(query,null)
+        cursor.moveToFirst()
+
+        val id =cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID))
+        val title =cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE))
+        val content =cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONTENT))
+
+        cursor.close()
+        db.close()
+        return Story(id, title, content)
+    }
+
+    fun deleteStory(storyId: Int){
+        val db = writableDatabase
+        val whereClause = "$COLUMN_ID = ?"
+        val whereArgs = arrayOf(storyId.toString())
+        db.delete(TABLE_NAME,whereClause, whereArgs)
+        db.close()
+    }
 }
